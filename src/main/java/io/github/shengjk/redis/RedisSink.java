@@ -31,8 +31,6 @@ import org.apache.flink.table.types.logical.LogicalTypeRoot;
 import org.apache.flink.table.types.logical.RowType;
 import org.apache.flink.types.Row;
 import org.apache.flink.types.RowKind;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import redis.clients.jedis.JedisCluster;
 
 import java.util.HashMap;
@@ -43,7 +41,6 @@ import static io.github.shengjk.redis.RedisTableSinkFactory.*;
 
 
 public class RedisSink implements DynamicTableSink {
-	private final static Logger LOGGER = LoggerFactory.getLogger(RedisSink.class);
 
 
 	private final DataType       type;
@@ -87,6 +84,17 @@ public class RedisSink implements DynamicTableSink {
 
 		private static final long serialVersionUID = 1L;
 
+		private static final String HASH                = "hash";
+		private static final String SET                 = "set";
+		private static final String SADD                = "sadd";
+		private static final String ZADD                = "zadd";
+		private static final String RPUSH               = "rpush";
+		private static final String LPUSH               = "lpush";
+		private static final String PFADD               = "pfadd";
+		private static final String PUBLISH             = "publish";
+		private static final String EVALUATE_SYMBOL_PRE = "${";
+		private static final String EVALUATE_SYMBOL_SUF = "}";
+
 		private final DataStructureConverter           converter;
 		private final ReadableConfig                   options;
 		private final DataType                         type;
@@ -128,17 +136,6 @@ public class RedisSink implements DynamicTableSink {
 		}
 
 		@Override
-		/*
-		2> +I(1,30017323,1101)
-		2> -U(1,30017323,1101)
-		2> +U(2,30017323,1101)
-		2> -U(2,30017323,1101)
-		2> +U(3,30017323,1101)
-		2> -U(3,30017323,1101)
-		2> +U(4,30017323,1101)
-		3> -U(3,980897,3208)
-		3> +U(4,980897,3208)
-		 */
 		public void invoke(RowData rowData, Context context) {
 			RowKind rowKind = rowData.getRowKind();
 			Row data = (Row) converter.toExternal(rowData);
@@ -149,11 +146,11 @@ public class RedisSink implements DynamicTableSink {
 					throw new NullPointerException(" keyTemplate is null or keyTemplate is empty");
 				}
 
-				if (keyTemplate.contains("${")) {
+				if (keyTemplate.contains(EVALUATE_SYMBOL_PRE)) {
 					String[] split = keyTemplate.split("\\$\\{");
 					keyTemplate = "";
 					for (String s : split) {
-						if (s.contains("}")) {
+						if (s.contains(EVALUATE_SYMBOL_SUF)) {
 							String filedName = s.substring(0, s.length() - 1);
 							int index = fields.get(filedName);
 							keyTemplate = keyTemplate + String.valueOf(data.getField(index));
@@ -165,14 +162,13 @@ public class RedisSink implements DynamicTableSink {
 
 				String keyType = options.get(KEY_TYPE);
 				String valueNames = options.get(VALUE_NAMES);
-				// type=hash must need fieldTemplate
-				if ("hash".equalsIgnoreCase(keyType)) {
+				if (HASH.equalsIgnoreCase(keyType)) {
 					String fieldTemplate = options.get(FIELD_TEMPLATE);
-					if (fieldTemplate.contains("${")) {
+					if (fieldTemplate.contains(EVALUATE_SYMBOL_PRE)) {
 						String[] split = fieldTemplate.split("\\$\\{");
 						fieldTemplate = "";
 						for (String s : split) {
-							if (s.contains("}")) {
+							if (s.contains(EVALUATE_SYMBOL_SUF)) {
 								String fieldName = s.substring(0, s.length() - 1);
 								int index = fields.get(fieldName);
 								fieldTemplate = fieldTemplate + String.valueOf(data.getField(index));
@@ -182,7 +178,6 @@ public class RedisSink implements DynamicTableSink {
 						}
 					}
 
-					//fieldName = fieldTemplate-valueName
 					if (valueNames.contains(",")) {
 						HashMap<String, String> map = new HashMap<>();
 						String[] fieldNames = valueNames.split(",");
@@ -195,20 +190,20 @@ public class RedisSink implements DynamicTableSink {
 						jedisCluster.hset(keyTemplate, fieldTemplate + "-" + valueNames, String.valueOf(data.getField(fields.get(valueNames))));
 					}
 
-				} else if ("set".equalsIgnoreCase(keyType)) {
+				} else if (SET.equalsIgnoreCase(keyType)) {
 					jedisCluster.set(keyTemplate, String.valueOf(data.getField(fields.get(valueNames))));
 
-				} else if ("sadd".equalsIgnoreCase(keyType)) {
+				} else if (SADD.equalsIgnoreCase(keyType)) {
 					jedisCluster.sadd(keyTemplate, String.valueOf(data.getField(fields.get(valueNames))));
-				} else if ("zadd".equalsIgnoreCase(keyType)) {
+				} else if (ZADD.equalsIgnoreCase(keyType)) {
 					jedisCluster.sadd(keyTemplate, String.valueOf(data.getField(fields.get(valueNames))));
-				} else if ("rpush".equalsIgnoreCase(keyType)) {
+				} else if (RPUSH.equalsIgnoreCase(keyType)) {
 					jedisCluster.rpush(keyTemplate, String.valueOf(data.getField(fields.get(valueNames))));
-				} else if ("lpush".equalsIgnoreCase(keyType)) {
+				} else if (LPUSH.equalsIgnoreCase(keyType)) {
 					jedisCluster.lpush(keyTemplate, String.valueOf(data.getField(fields.get(valueNames))));
-				} else if ("pfadd".equalsIgnoreCase(keyType)) {
+				} else if (PFADD.equalsIgnoreCase(keyType)) {
 					jedisCluster.pfadd(keyTemplate, String.valueOf(data.getField(fields.get(valueNames))));
-				} else if ("publish".equalsIgnoreCase(keyType)) {
+				} else if (PUBLISH.equalsIgnoreCase(keyType)) {
 					jedisCluster.publish(keyTemplate, String.valueOf(data.getField(fields.get(valueNames))));
 				} else {
 					throw new IllegalArgumentException(" not find this keyType:" + keyType);
@@ -223,11 +218,11 @@ public class RedisSink implements DynamicTableSink {
 					throw new NullPointerException(" keyTemplate is null or keyTemplate is empty");
 				}
 
-				if (keyTemplate.contains("${")) {
+				if (keyTemplate.contains(EVALUATE_SYMBOL_PRE)) {
 					String[] split = keyTemplate.split("\\$\\{");
 					keyTemplate = "";
 					for (String s : split) {
-						if (s.contains("}")) {
+						if (s.contains(EVALUATE_SYMBOL_SUF)) {
 							String filedName = s.substring(0, s.length() - 1);
 							int index = fields.get(filedName);
 							keyTemplate = keyTemplate + String.valueOf(data.getField(index));
@@ -239,14 +234,13 @@ public class RedisSink implements DynamicTableSink {
 
 				String keyType = options.get(KEY_TYPE);
 				String valueNames = options.get(VALUE_NAMES);
-				// type=hash must need fieldTemplate
-				if ("hash".equalsIgnoreCase(keyType)) {
+				if (HASH.equalsIgnoreCase(keyType)) {
 					String fieldTemplate = options.get(FIELD_TEMPLATE);
-					if (fieldTemplate.contains("${")) {
+					if (fieldTemplate.contains(EVALUATE_SYMBOL_PRE)) {
 						String[] split = fieldTemplate.split("\\$\\{");
 						fieldTemplate = "";
 						for (String s : split) {
-							if (s.contains("}")) {
+							if (s.contains(EVALUATE_SYMBOL_SUF)) {
 								String fieldName = s.substring(0, s.length() - 1);
 								int index = fields.get(fieldName);
 								fieldTemplate = fieldTemplate + String.valueOf(data.getField(index));
@@ -256,7 +250,6 @@ public class RedisSink implements DynamicTableSink {
 						}
 					}
 
-					//fieldName = fieldTemplate-valueName
 					String[] fieldNames = valueNames.split(",");
 					for (String fieldName : fieldNames) {
 						LogicalTypeRoot logicalTypeRoot = fieldTypes.get(fieldName);

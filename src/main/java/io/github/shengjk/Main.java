@@ -21,20 +21,14 @@ package io.github.shengjk;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.calcite.shaded.org.apache.commons.io.FileUtils;
-import org.apache.flink.configuration.Configuration;
-import org.apache.flink.streaming.api.CheckpointingMode;
-import org.apache.flink.streaming.api.environment.CheckpointConfig;
-import org.apache.flink.streaming.api.environment.ExecutionCheckpointingOptions;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
-import org.apache.flink.table.api.TableConfig;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.nio.charset.Charset;
-import java.time.Duration;
 import java.util.Objects;
 
 /**
@@ -53,29 +47,9 @@ public class Main {
 		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 		env.getConfig().setRestartStrategy(RestartStrategies.fixedDelayRestart(RESTARTAT_TEMPTS, DELAY_BETWEENAT_TEMPTS));
 
-		//fool configuration
 		EnvironmentSettings environmentSettings = EnvironmentSettings.newInstance().useBlinkPlanner().inStreamingMode().build();
 		StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, environmentSettings);
 
-		// enable state ttl
-		TableConfig config = tableEnv.getConfig();
-		config.setIdleStateRetention(Duration.ofDays(1));
-		// enable checkpointing
-		Configuration configuration = config.getConfiguration();
-		configuration.set(
-				ExecutionCheckpointingOptions.CHECKPOINTING_MODE, CheckpointingMode.EXACTLY_ONCE);
-		configuration.set(
-				ExecutionCheckpointingOptions.CHECKPOINTING_INTERVAL, Duration.ofSeconds(10));
-		configuration.set(ExecutionCheckpointingOptions.CHECKPOINTING_TIMEOUT, Duration.ofMinutes(30));
-
-		configuration.set(ExecutionCheckpointingOptions.EXTERNALIZED_CHECKPOINT, CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
-
-		// 可以通过 set 命令来配置
-		// set low-level key-value options
-		configuration.setString("table.exec.mini-batch.enabled", "true"); // enable mini-batch optimization
-		configuration.setString("table.exec.mini-batch.allow-latency", "1 s"); // use 5 seconds to buffer input records
-		configuration.setString("table.exec.mini-batch.size", "1000");
-		configuration.setString("table.exec.sink.not-null-enforcer", "drop");
 
 		String sqlPath = parameter.get("sqlPath");
 		if (Objects.isNull(sqlPath)) {
@@ -89,7 +63,6 @@ public class Main {
 		String comment = parameter.get("comment");
 		LOGGER.info("comment:{} ", Objects.nonNull(comment) ? comment : "--");
 		sqlExecer.run(Objects.nonNull(comment) ? comment : "--");
-//		tableEnv.execute(parameter.get("jobName", ""));
 		LOGGER.info("running......");
 	}
 

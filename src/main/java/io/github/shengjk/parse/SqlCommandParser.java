@@ -162,7 +162,7 @@ public final class SqlCommandParser {
 				SINGLE_OPERAND),
 
 		SET(
-				"SET(\\s+(\\S+)\\s*=\\s*(.*))?", // whitespace is only ignored on the left side of '='
+				"SET(\\s+(\\S+)\\s*=\\s*(.*))?",
 				(operands) -> {
 					if (operands.length < 3) {
 						return Optional.empty();
