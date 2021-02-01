@@ -43,13 +43,6 @@ under the License.
 
 
     <dependencies>
-        <dependency>
-            <groupId>com.ishansong.bigdata</groupId>
-            <artifactId>flink-common-lib</artifactId>
-            <version>1.12-SNAPSHOT</version>
-        </dependency>
-
-
         <!-- Add connector dependencies here. They must be in the default scope (compile). -->
         <!-- https://mvnrepository.com/artifact/org.apache.flink/flink-connector-kafka -->
         <dependency>
