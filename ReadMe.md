@@ -1,17 +1,20 @@
 ## 项目现状
 
 #### 环境
+
 ```
 jdk8
 flink1.12.x
 ```
 
 #### 最终达到的效果
+
 ```
 传入 sql 文件，即可执行，然后通过命令行提交
 ```
 
 #### 设置参数
+
 ```
 可以在 sql 文件中设置 checkpointing.interval、state.ttl 等，具体可以查看 sqldemo/sqlDemo.sql
 目前支持设置 ExecutionConfigOptions、OptimizerConfigOptions、TableConfigOptions、ExecutionCheckpointingOptions 类中的参数
@@ -33,8 +36,8 @@ be considered as milliseconds.
   <li>NANOSECONDS： "ns", "nano", "nanosecond"
 ```
 
-
 #### 部署
+
 ```
 除了必要的 connector 还需要下面的 jar
 kafka-clients-2.4.1.jar
@@ -44,8 +47,11 @@ libfb303-0.9.2.jar
 ```
 
 #### 执行方式
+
 ```
 flink-1.12.0/bin/flink  run -p 3 -yt ./flinkjar/  -C file:///home/shengjk/flinkjar/test-udf.jar -C file:///home/shengjk/flinkjar/jedis-2.10.2.jar  -m yarn-cluster -ynm sqlDemo  -c io.github.shengjk.Main ./flinksql-platform-1.0-SNAPSHOT.jar --sqlPath ./sqlDemo.sql
+or
+flink-1.12.0/bin/flink  run -p 3 -yt ./flinkjar/  -C file:///home/shengjk/flinkjar/test-udf.jar -C file:///home/shengjk/flinkjar/jedis-2.10.2.jar  -m yarn-cluster -ynm sqlDemo  -c io.github.shengjk.Main ./flinksql-platform-1.0-SNAPSHOT.jar --sqlPath hdfs://nameservice1/sqlDemo.sql
 
 -C 添加 udfJar 等第三方 jar 包  -C 参数apply到了client端生成的JobGraph里，然后提交JobGraph来运行的 
 -yt 目录 将 udfJar 等第三方 jar 包提交到 TaskManager 上
@@ -56,6 +62,7 @@ sql 文件默认的注释方式为 -- 若要改变注释方式通过参数  --co
 ## other
 
 #### 自定义的 RedisSink
+
 ```
 create table test(
 `id` bigint,

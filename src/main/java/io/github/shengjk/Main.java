@@ -18,16 +18,22 @@
 
 package io.github.shengjk;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.calcite.shaded.org.apache.commons.io.FileUtils;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Objects;
 
@@ -57,8 +63,23 @@ public class Main {
 		}
 		LOGGER.info("sqlPath:{}", sqlPath);
 
-		File sqlFile = new File(sqlPath);
-		String sqls = FileUtils.readFileToString(sqlFile, Charset.forName("UTF-8"));
+		String sqls = "";
+		if (sqlPath.startsWith("hdfs:")) {
+			LOGGER.info("sqlPath:{}", sqlPath);
+			sqlPath = sqlPath.substring(sqlPath.indexOf("/", sqlPath.indexOf("/") + 2), sqlPath.length());
+			org.apache.hadoop.conf.Configuration conf = new org.apache.hadoop.conf.Configuration();
+			FileSystem fs = FileSystem.get(URI.create(sqlPath), conf);
+			FSDataInputStream hdfsInStream = fs.open(new Path(sqlPath));
+			sqls = IOUtils.toString(hdfsInStream, "utf-8");
+			try {
+				hdfsInStream.close();
+			} catch (IOException e) {
+			}
+		} else {
+			File sqlFile = new File(sqlPath);
+			sqls = FileUtils.readFileToString(sqlFile, Charset.forName("UTF-8"));
+		}
+
 		SqlExecer sqlExecer = new SqlExecer(tableEnv, sqls);
 		String comment = parameter.get("comment");
 		LOGGER.info("comment:{} ", Objects.nonNull(comment) ? comment : "--");
