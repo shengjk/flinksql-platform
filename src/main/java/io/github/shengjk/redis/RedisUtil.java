@@ -12,7 +12,7 @@ import java.util.HashSet;
  * @date 2018/7/16
  */
 public class RedisUtil {
-	protected final static org.slf4j.Logger logger = LoggerFactory.getLogger(RedisUtil.class);
+	protected final static org.slf4j.Logger LOGGER = LoggerFactory.getLogger(RedisUtil.class);
 
 
 	/**
@@ -77,7 +77,7 @@ public class RedisUtil {
 				conn.close();
 			}
 		} catch (Exception e) {
-			logger.error("JedisCluster close error {}", e);
+			LOGGER.error("JedisCluster close error {}", e);
 		}
 	}
 }

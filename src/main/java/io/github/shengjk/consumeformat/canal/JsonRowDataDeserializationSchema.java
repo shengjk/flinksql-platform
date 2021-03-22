@@ -37,7 +37,6 @@ import static java.lang.String.format;
 import static org.apache.flink.util.Preconditions.checkNotNull;
 
 /**
- * inspired from https://github.com/apache/flink/blob/9d674edd478706cc8ef7233d42385e948bae60e6/flink-formats/flink-json/src/main/java/org/apache/flink/formats/json/JsonRowDataDeserializationSchema.java
  * Deserialization schema from JSON to Flink Table/SQL internal data structure {@link RowData}.
  *
  * <p>Deserializes a <code>byte[]</code> message as a JSON object and reads the specified fields.

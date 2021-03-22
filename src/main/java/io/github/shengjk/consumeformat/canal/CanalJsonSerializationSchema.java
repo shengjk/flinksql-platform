@@ -33,7 +33,6 @@ import java.util.Objects;
 import static org.apache.flink.table.types.utils.TypeConversions.fromLogicalToDataType;
 
 /**
- * inspired from https://github.com/apache/flink/blob/5b9f4db30e5afcf23588f44da767aaa218df1207/flink-formats/flink-json/src/main/java/org/apache/flink/formats/json/canal/CanalJsonSerializationSchema.java
  * Serialization schema that serializes an object of Flink Table/SQL internal data structure {@link
  * RowData} into a Canal JSON bytes.
  *

@@ -10,7 +10,6 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 
 /**
- * reference https://github.com/apache/zeppelin/blob/d4c18c1c46897b14828487a050db887bbcc36a0a/flink/flink-shims/src/main/java/org/apache/zeppelin/flink/sql/SqlCommandParser.java
  * Simple parser for determining the type of command and its parameters.
  * All the SqlCommands should be put into this class, and the parsing logic needs to be put ito FlinkShims
  * because each version of flink has different sql syntax support.

@@ -40,7 +40,7 @@ import static java.lang.String.format;
 import static org.apache.flink.table.types.utils.TypeConversions.fromLogicalToDataType;
 
 /**
- * inspired from https://github.com/apache/flink/blob/3fea150713c970d8f1dd54670049115116029af4/flink-formats/flink-json/src/main/java/org/apache/flink/formats/json/canal/CanalJsonDeserializationSchema.java
+ *
  */
 public final class CanalJsonDeserializationSchema implements DeserializationSchema<RowData> {
 	private static final long serialVersionUID = 1L;

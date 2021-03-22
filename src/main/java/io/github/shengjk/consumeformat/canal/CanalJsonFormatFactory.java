@@ -47,7 +47,6 @@ import java.util.Set;
 import static org.apache.flink.formats.json.canal.CanalJsonOptions.*;
 
 /**
- * * inspired from https://github.com/apache/flink/blob/5b9f4db30e5afcf23588f44da767aaa218df1207/flink-formats/flink-json/src/main/java/org/apache/flink/formats/json/canal/CanalJsonFormatFactory.java
  * Format factory for providing configured instances of Canal JSON to RowData {@link
  * DeserializationSchema}.
  */

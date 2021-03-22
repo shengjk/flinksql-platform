@@ -50,7 +50,6 @@ import static io.github.shengjk.consumeformat.canal.TimeFormats.*;
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
 
 /**
- * inspired from  https://github.com/apache/flink/blob/97bfd049951f8d52a2e0aed14265074c4255ead0/flink-formats/flink-json/src/main/java/org/apache/flink/formats/json/JsonToRowDataConverters.java
  * Tool class used to convert from {@link JsonNode} to {@link RowData}. *
  */
 @Internal

@@ -47,7 +47,6 @@ import java.util.regex.Matcher;
 
 /**
  * Shims for flink 1.12
- * reference https://github.com/apache/zeppelin/blob/6f0b8bd262b87649dd38de5437d92662ae9b706f/flink/flink1.12-shims/src/main/java/org/apache/zeppelin/flink/Flink112Shims.java
  */
 public class Flink112Shims {
 
